@@ -3,11 +3,15 @@ import { Navbar } from '@/components/Navbar';
 import { UserMenu } from '@/components/UserMenu';
 import { StatCard } from '@/components/StatCard';
 import { DoctorList, Doctor } from '@/components/DoctorList';
-import { ChartDistribution } from '@/components/ChartDistribution';
-import { Users, ChartLine, CalendarDays, LogIn } from 'lucide-react';
+import { OrganizationAnalytics } from '@/components/OrganizationAnalytics';
+import { OrganizationPatientManagement } from '@/components/OrganizationPatientManagement';
+import { AdvancedReporting } from '@/components/AdvancedReporting';
+
+import { Users, ChartLine, CalendarDays, LogIn, BarChart3, UserCheck, FileSpreadsheet } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizationAPI } from '@/lib/api';
 import { Link } from 'wouter';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function OrganizationDashboard() {
   const { toast } = useToast();
@@ -26,6 +30,7 @@ export default function OrganizationDashboard() {
           variant: 'destructive', 
           title: 'Dashboard Data Unavailable',
           description: 'Unable to load live data. Showing dashboard with sample data.',
+          className: 'text-white',
         });
         
         // Always show dashboard with fallback data
@@ -50,32 +55,59 @@ export default function OrganizationDashboard() {
 
   const handleRemoveDoctor = async (doctorId: string) => {
     try {
-      organizationAPI.removeDoctor(doctorId);
+      // Get current user to get organization ID
+      const currentUser = await organizationAPI.getCurrentUser();
+      const organizationId = currentUser?.id;
+      
+      if (!organizationId) {
+        throw new Error('Organization ID not found');
+      }
+
+      
+      await organizationAPI.removeDoctor(organizationId, doctorId);
       toast({
         title: 'Doctor removed',
         description: 'Doctor has been removed from your organization',
       });
-    } catch (error) {
+      
+      // Refresh dashboard data
+      const data = await organizationAPI.getDashboard();
+      setDashboardData(data);
+    } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Failed to remove doctor',
-        description: 'An error occurred while removing the doctor',
+        description: error.message || 'An error occurred while removing the doctor',
+        className: 'text-white',
       });
     }
   };
 
   const handleAddDoctor = async (doctorData: any) => {
     try {
-      organizationAPI.addDoctor(doctorData);
+      // Get current user to get organization ID
+      const currentUser = await organizationAPI.getCurrentUser();
+      const organizationId = currentUser?.id;
+      
+      if (!organizationId) {
+        throw new Error('Organization ID not found');
+      }
+
+      await organizationAPI.addDoctor(organizationId, doctorData);
       toast({
         title: 'Doctor added',
         description: 'New doctor has been added to your organization',
       });
+      
+      // Refresh dashboard data
+      const data = await organizationAPI.getDashboard();
+      setDashboardData(data);
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Failed to add doctor',
         description: 'An error occurred while adding the new doctor',
+        className: 'text-white',
       });
     }
   };
@@ -128,7 +160,7 @@ export default function OrganizationDashboard() {
               change={dashboardData.stats.recordsTodayChange}
               icon={<CalendarDays className="h-5 w-5" />}
               iconColor="text-accent"
-              iconBgColor="bg-accent bg-opacity-20 textwhite"
+              iconBgColor="bg-accent bg-opacity-20"
             />
             <StatCard
               title="Records This Month"
@@ -139,13 +171,60 @@ export default function OrganizationDashboard() {
               iconBgColor="bg-green-500 bg-opacity-20"
             />
           </div>
-          
-          {/* Doctors List */}
-          <DoctorList
-            doctors={dashboardData.doctors}
-            onRemoveDoctor={handleRemoveDoctor}
-            onAddDoctor={handleAddDoctor}
-          />
+
+          {/* Tabs Navigation */}
+          <Tabs defaultValue="doctors" className="w-full">
+            <TabsList className="grid w-full grid-cols-4 bg-primary-800 border border-primary-600">
+              <TabsTrigger 
+                value="doctors" 
+                className="data-[state=active]:bg-accent data-[state=active]:text-white text-primary-200"
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Doctors
+              </TabsTrigger>
+              <TabsTrigger 
+                value="analytics" 
+                className="data-[state=active]:bg-accent data-[state=active]:text-white text-primary-200"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger 
+                value="patients" 
+                className="data-[state=active]:bg-accent data-[state=active]:text-white text-primary-200"
+              >
+                <UserCheck className="h-4 w-4 mr-2" />
+                Patients
+              </TabsTrigger>
+              <TabsTrigger 
+                value="reports" 
+                className="data-[state=active]:bg-accent data-[state=active]:text-white text-primary-200"
+              >
+                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                Reports
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="doctors" className="mt-6">
+              <DoctorList
+                doctors={dashboardData.doctors || []}
+                onRemoveDoctor={handleRemoveDoctor}
+                onAddDoctor={handleAddDoctor}
+              />
+            </TabsContent>
+
+            <TabsContent value="analytics" className="mt-6">
+              <OrganizationAnalytics />
+            </TabsContent>
+
+            <TabsContent value="patients" className="mt-6">
+              <OrganizationPatientManagement />
+            </TabsContent>
+
+            <TabsContent value="reports" className="mt-6">
+              <AdvancedReporting />
+            </TabsContent>
+          </Tabs>
         </div>
       </section>
     </div>

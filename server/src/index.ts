@@ -63,6 +63,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Health check endpoint for Railway
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Medical Assistant API is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 // API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/doctor', doctorRoutes);

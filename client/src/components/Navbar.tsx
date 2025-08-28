@@ -94,7 +94,7 @@ export function Navbar({ showAuthButtons = true, userType = null }: NavbarProps)
           <div className="flex flex-col p-4">
             {links.map((link) =>
               <Link key={link.href} href={link.href}>
-                <div className="px-4 py-2 text-white hover:text-gray-200 rounded-md cursor-pointer" style={{":hover": {backgroundColor: '#1a0a3a'}}}>
+                <div className="px-4 py-2 text-white hover:text-gray-200 rounded-md cursor-pointer" >
                   {link.label}
                 </div>
               </Link>

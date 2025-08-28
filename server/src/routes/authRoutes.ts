@@ -1,5 +1,5 @@
 import express from 'express';
-import { login, signupDoctor, signupOrganization, logout, getCurrentUser } from '../controllers/authController.js';
+import { login, signupDoctor, signupOrganization, logout, getCurrentUser, updatePassword } from '../controllers/authController.js';
 import { protect } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -28,5 +28,10 @@ router.get('/me', protect, getCurrentUser);
 // @desc    Logout doctor
 // @access  Private
 router.post('/logout', protect, logout);
+
+// @route   PUT /api/auth/update-password
+// @desc    Update password
+// @access  Private
+router.put('/update-password', protect, updatePassword);
 
 export default router;

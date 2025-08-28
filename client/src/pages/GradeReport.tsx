@@ -78,12 +78,14 @@ export default function GradeReport() {
       toast({
         title: 'Grading Complete',
         description: `Image successfully analyzed - Grade: ${processedResult.fibrosis.grade}`,
+        className: 'text-white', // Add this line if supported
       });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Grading failed',
         description: 'An error occurred while grading the image',
+        className: 'text-white', // Add this line if supported
       });
     } finally {
       setIsGrading(false);

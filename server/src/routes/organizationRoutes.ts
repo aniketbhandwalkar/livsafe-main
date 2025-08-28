@@ -1,6 +1,8 @@
 import express from 'express';
 import {
   getDashboard,
+  getAnalytics,
+  getOrganizationPatients,
   getAllOrganizations,
   getOrganization,
   createOrganization,
@@ -19,10 +21,25 @@ const router = express.Router();
 // @access  Private
 router.get('/dashboard', protect, getDashboard);
 
+// @route   GET /api/organization/analytics
+// @desc    Get organization analytics data
+// @access  Private
+router.get('/analytics', protect, getAnalytics);
+
+// @route   GET /api/organization/patients
+// @desc    Get organization patients
+// @access  Private
+router.get('/patients', protect, getOrganizationPatients);
+
 // @route   GET /api/organization/all
 // @desc    Get all organizations
 // @access  Private
 router.get('/all', protect, getAllOrganizations);
+
+// @route   POST /api/organization
+// @desc    Create new organization
+// @access  Private
+router.post('/', protect, createOrganization);
 
 // @route   GET /api/organization/:id/doctors
 // @desc    Get doctors in organization
@@ -39,16 +56,6 @@ router.post('/:id/doctors', protect, addDoctorToOrganization);
 // @access  Private
 router.delete('/:id/doctors/:doctorId', protect, removeDoctorFromOrganization);
 
-// @route   GET /api/organization/:id
-// @desc    Get single organization
-// @access  Private
-router.get('/:id', protect, getOrganization);
-
-// @route   POST /api/organization
-// @desc    Create new organization
-// @access  Private
-router.post('/', protect, createOrganization);
-
 // @route   PUT /api/organization/:id
 // @desc    Update organization
 // @access  Private
@@ -58,5 +65,10 @@ router.put('/:id', protect, updateOrganization);
 // @desc    Delete organization
 // @access  Private
 router.delete('/:id', protect, deleteOrganization);
+
+// @route   GET /api/organization/:id
+// @desc    Get single organization
+// @access  Private
+router.get('/:id', protect, getOrganization);
 
 export default router;

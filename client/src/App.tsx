@@ -15,7 +15,10 @@ import GradeReport from "@/pages/GradeReport";
 import Search from "@/pages/Search";
 import ChatPage from "@/pages/ChatPage";
 import PatientRecordView from "@/pages/PatientRecordView";
-import TestChat from "@/pages/TestChat";
+import About from "@/pages/About";
+import Help from "@/pages/Help";
+import UpdatePassword from "@/pages/UpdatePassword";
+import OrganizationProfile from "@/pages/OrganizationProfile";
 
 function Router() {
   return (
@@ -27,8 +30,12 @@ function Router() {
       <Route path="/doctor/grade" component={GradeReport} />
       <Route path="/doctor/search" component={Search} />
       <Route path="/organization/dashboard" component={OrganizationDashboard} />
+      <Route path="/organization/profile" component={OrganizationProfile} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/doctor/record/:id" component={PatientRecordView} />
+      <Route path="/update-password" component={UpdatePassword} />
+      <Route path="/about" component={About} />
+      <Route path="/help" component={Help} />
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>

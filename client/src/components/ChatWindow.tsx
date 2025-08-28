@@ -88,9 +88,7 @@ I've provided a detailed analysis above. Please feel free to ask any questions a
       const welcomeMessage: Message = {
         id: 'welcome-' + Date.now(),
         type: 'ai',
-        content: `Hello, I'm Dr. Marcus Thompson, a hepatologist with over 30 years of experience specializing in liver diseases and fibrosis assessment. 
-
-I'm here to help you with any questions about liver health, fibrosis staging, treatment options, or general hepatology concerns. How can I assist you today?`,
+        content: `Hello, I'm Dr. Marcus Thompson, I'm here to help you with any questions about liver health, fibrosis staging, treatment options, or general hepatology concerns. How can I assist you today?`,
         timestamp: new Date()
       };
 
@@ -258,7 +256,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">Dr. Marcus Thompson</h1>
-            <p className="text-sm text-primary-300">Hepatologist • 30+ Years Experience</p>
+            <p className="text-sm text-primary-300">Hepatologist</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -363,7 +361,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask Dr. Thompson about liver health, fibrosis, treatment options..."
-              className="bg-primary-700 border-primary-600 text-black placeholder-primary-400 resize-none"
+              className="bg-primary-700 border-primary-600 text-white placeholder-gray-400  resize-none"
               rows={3}
               disabled={isLoading}
             />

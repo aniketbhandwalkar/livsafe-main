@@ -81,6 +81,7 @@ export default function DoctorDashboard() {
       toast({
         title: 'Dashboard Refreshed',
         description: 'Latest data has been loaded',
+        className: 'text-white',
       });
     } catch (error: any) {
       toast({
@@ -105,6 +106,7 @@ export default function DoctorDashboard() {
         toast({
           title: 'Record Deleted',
           description: `Record ${id} has been deleted successfully`,
+          className:'text-white',
         });
         
         // Refresh dashboard data
@@ -152,12 +154,14 @@ Generated: ${new Date().toLocaleDateString()}
       toast({
         title: 'PDF Downloaded',
         description: 'Dashboard report has been downloaded',
+        className: 'text-white',
       });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Download Failed',
         description: 'Could not generate PDF report',
+        className: 'text-white',
       });
     }
   };
@@ -184,12 +188,14 @@ Generated: ${new Date().toLocaleDateString()}
       toast({
         title: 'CSV Downloaded',
         description: 'Dashboard data has been exported to CSV',
+        className: 'text-white',
       });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Export Failed',
         description: 'Could not export CSV file',
+        className: 'text-white',
       });
     }
   };
@@ -267,6 +273,7 @@ Generated: ${new Date().toLocaleDateString()}
       toast({
         title: 'PDF Downloaded',
         description: `Medical record ${record.id} has been downloaded as PDF`,
+        className: 'text-white',
       });
     } catch (error) {
       // PDF generation error occurred
@@ -274,6 +281,7 @@ Generated: ${new Date().toLocaleDateString()}
         variant: 'destructive',
         title: 'Download Failed',
         description: 'Could not generate PDF. Please try again.',
+        className: 'text-white',
       });
     }
   };

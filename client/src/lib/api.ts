@@ -1,5 +1,5 @@
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 // Helper function for API calls
 const apiCall = async (url: string, options: RequestInit = {}) => {
@@ -74,6 +74,19 @@ export const authAPI = {
     await apiCall('/auth/logout', { method: 'POST' });
     localStorage.removeItem('token');
     return { message: "Logged out successfully" };
+  },
+
+  updatePassword: async (currentPassword: string, newPassword: string) => {
+    try {
+      const response = await apiCall('/auth/update-password', {
+        method: 'PUT',
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      return response;
+    } catch (error: any) {
+      console.error('Password update error:', error);
+      throw error;
+    }
   },
 
   signupDoctor: async (data: any) => {
@@ -205,9 +218,24 @@ export const medicalImagesAPI = {
 };
 
 export const organizationAPI = {
+  getCurrentUser: async () => {
+    const response = await apiCall('/auth/me');
+    return response.data;
+  },
+
   getDashboard: async () => {
     const response = await apiCall('/organization/dashboard');
     return response.data;
+  },
+
+  getAnalytics: async (timeRange = '30') => {
+    const response = await apiCall(`/organization/analytics?timeRange=${timeRange}`);
+    return response.data;
+  },
+
+  getPatients: async (page = 1, limit = 50, search = '') => {
+    const response = await apiCall(`/organization/patients?page=${page}&limit=${limit}&search=${search}`);
+    return response;
   },
 
   getDoctors: async () => {
@@ -215,16 +243,16 @@ export const organizationAPI = {
     return response.data;
   },
 
-  addDoctor: async (doctorData: any) => {
-    const response = await apiCall('/auth/signup/doctor', {
+  addDoctor: async (organizationId: string, doctorData: any) => {
+    const response = await apiCall(`/organization/${organizationId}/doctors`, {
       method: 'POST',
       body: JSON.stringify(doctorData),
     });
     return response;
   },
 
-  removeDoctor: async (doctorId: string) => {
-    const response = await apiCall(`/doctor/${doctorId}`, {
+  removeDoctor: async (organizationId: string, doctorId: string) => {
+    const response = await apiCall(`/organization/${organizationId}/doctors/${doctorId}`, {
       method: 'DELETE',
     });
     return response;
@@ -233,6 +261,19 @@ export const organizationAPI = {
   getAllOrganizations: async () => {
     const response = await apiCall('/organization/all');
     return response.data;
+  },
+
+  getOrganization: async (id: string) => {
+    const response = await apiCall(`/organization/${id}`);
+    return response.data;
+  },
+
+  updateOrganization: async (id: string, data: any) => {
+    const response = await apiCall(`/organization/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+    return response;
   },
 };
 

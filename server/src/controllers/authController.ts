@@ -268,3 +268,111 @@ export const logout = async (req: Request, res: Response) => {
     message: 'Logged out successfully'
   });
 };
+
+// @desc    Update password
+// @route   PUT /api/auth/update-password
+// @access  Private
+export const updatePassword = async (req: AuthRequest, res: Response) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate request body
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide current password and new password'
+      });
+    }
+
+    // Validate new password length
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long'
+      });
+    }
+
+    // Check if new password is the same as current password
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from current password'
+      });
+    }
+
+    const { doctor, organization } = req;
+    
+    // If it's a doctor
+    if (doctor) {
+      // Fetch doctor with password for comparison
+      const doctorWithPassword = await Doctor.findById(doctor._id).select('+password');
+      if (!doctorWithPassword) {
+        return res.status(404).json({
+          success: false,
+          message: 'Doctor not found'
+        });
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await doctorWithPassword.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Current password is incorrect'
+        });
+      }
+
+      // Update password
+      doctorWithPassword.password = newPassword;
+      await doctorWithPassword.save();
+
+      return res.status(200).json({
+        success: true,
+        message: 'Password updated successfully'
+      });
+    }
+
+    // If it's an organization
+    if (organization) {
+      // Fetch organization with password for comparison
+      const organizationWithPassword = await Organization.findById(organization._id).select('+password');
+      if (!organizationWithPassword) {
+        return res.status(404).json({
+          success: false,
+          message: 'Organization not found'
+        });
+      }
+
+      // Verify current password
+      const isCurrentPasswordValid = await organizationWithPassword.comparePassword(currentPassword);
+      if (!isCurrentPasswordValid) {
+        return res.status(400).json({
+          success: false,
+          message: 'Current password is incorrect'
+        });
+      }
+
+      // Update password
+      organizationWithPassword.password = newPassword;
+      await organizationWithPassword.save();
+
+      return res.status(200).json({
+        success: true,
+        message: 'Password updated successfully'
+      });
+    }
+
+    // Neither doctor nor organization found
+    return res.status(401).json({
+      success: false,
+      message: 'Not authenticated'
+    });
+    
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating password',
+      error: process.env.NODE_ENV === 'development' ? error : {}
+    });
+  }
+};
