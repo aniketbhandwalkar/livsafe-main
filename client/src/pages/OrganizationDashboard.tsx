@@ -68,6 +68,7 @@ export default function OrganizationDashboard() {
       toast({
         title: 'Doctor removed',
         description: 'Doctor has been removed from your organization',
+        className: 'text-white',
       });
       
       // Refresh dashboard data
@@ -97,6 +98,7 @@ export default function OrganizationDashboard() {
       toast({
         title: 'Doctor added',
         description: 'New doctor has been added to your organization',
+        className: 'text-white',
       });
       
       // Refresh dashboard data
