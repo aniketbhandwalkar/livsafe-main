@@ -76,7 +76,7 @@ Respond as Dr. Thompson would, with the authority of three decades of hepatology
       const welcomeMessage: Message = {
         id: 'welcome-' + Date.now(),
         type: 'ai',
-        content: `Hello, I'm Dr. Marcus Thompson. I've reviewed the liver fibrosis analysis for ${patientData.name} (Patient ID: ${patientData.id}). The imaging shows a ${patientData.grade} grade with ${patientData.confidence}% confidence. 
+        content: `Hello, I'm Livsafe. I've reviewed the liver fibrosis analysis for ${patientData.name} (Patient ID: ${patientData.id}). The imaging shows a ${patientData.grade} grade with ${patientData.confidence}% confidence. 
 
 I've provided a detailed analysis above. Please feel free to ask any questions about the findings, treatment recommendations, or follow-up protocols. I'm here to help with any clinical concerns you may have.`,
         timestamp: new Date()
@@ -88,7 +88,7 @@ I've provided a detailed analysis above. Please feel free to ask any questions a
       const welcomeMessage: Message = {
         id: 'welcome-' + Date.now(),
         type: 'ai',
-        content: `Hello, I'm Dr. Marcus Thompson, I'm here to help you with any questions about liver health, fibrosis staging, treatment options, or general hepatology concerns. How can I assist you today?`,
+        content: `Hello, I'm Livsafe, I'm here to help you with any questions about liver health, fibrosis staging, treatment options, or general hepatology concerns. How can I assist you today?`,
         timestamp: new Date()
       };
 
@@ -198,6 +198,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
         variant: 'destructive',
         title: 'AI Response Error',
         description: error.message,
+        className:'text-white'
       });
     } finally {
       setIsLoading(false);
@@ -216,6 +217,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
     toast({
       title: 'Copied to clipboard',
       description: 'Message copied successfully',
+      className:'text-white'
     });
   };
 
@@ -228,7 +230,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
       ? `Patient: ${patientData.name} (${patientData.id})\nGrade: ${patientData.grade}\nConfidence: ${patientData.confidence}%\nDate: ${patientData.date}\n\n---\n\n`
       : '';
 
-    const content = `Medical Consultation with Dr. Marcus Thompson\n${'='.repeat(50)}\n\n${patientInfo}${conversation}`;
+    const content = `Medical Consultation with LIvsafe\n${'='.repeat(50)}\n\n${patientInfo}${conversation}`;
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -243,6 +245,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
     toast({
       title: 'Conversation Downloaded',
       description: 'Your consultation has been saved',
+      className:'text-white'
     });
   };
 
@@ -255,8 +258,8 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
             <Bot className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">Dr. Marcus Thompson</h1>
-            <p className="text-sm text-primary-300">Hepatologist</p>
+            <h1 className="text-xl font-bold text-white">Livsafe</h1>
+            <p className="text-sm text-primary-400">Your AI Assistant</p>
           </div>
         </div>
         <div className="flex items-center space-x-2">
@@ -337,7 +340,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
                 <div className="w-8 h-8 rounded-full flex items-center justify-center mr-2 bg-accent">
                   <Bot className="h-4 w-4 text-white" />
                 </div>
-                <span className="text-xs text-primary-400">Dr. Thompson is typing...</span>
+                <span className="text-xs text-primary-400">Livsafe is typing...</span>
               </div>
               <div className="p-4 rounded-lg bg-primary-700 text-white">
                 <div className="flex items-center">
@@ -360,7 +363,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Ask Dr. Thompson about liver health, fibrosis, treatment options..."
+              placeholder="Ask Livsafe about liver health, fibrosis, treatment options..."
               className="bg-primary-700 border-primary-600 text-white placeholder-gray-400  resize-none"
               rows={3}
               disabled={isLoading}

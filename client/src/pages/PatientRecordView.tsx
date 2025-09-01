@@ -84,6 +84,7 @@ export default function PatientRecordView() {
           variant: "destructive",
           title: "Error loading record",
           description: error.message || "Failed to load patient record",
+          className:'text-white'
         });
 
         // Enhanced mock data for demonstration if API fails
@@ -205,12 +206,14 @@ export default function PatientRecordView() {
       toast({
         title: "PDF Downloaded",
         description: `Medical record ${record.id} has been downloaded as PDF`,
+        className:'text-white'
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Download Failed",
         description: "Could not generate PDF. Please try again.",
+        className:'text-white'
       });
     }
   };

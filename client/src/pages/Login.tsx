@@ -40,10 +40,12 @@ export default function Login() {
     setIsLoading(true);
     try {
       const success = await login(values.email, values.password);
+      console.log('sucesssssss........');
       if (success) {
         toast({
           title: 'Login successful',
           description: 'Redirecting to dashboard...',
+          className:'text-white'
         });
         // AuthContext will handle the redirect based on user type
       } else {
@@ -51,6 +53,7 @@ export default function Login() {
           variant: 'destructive',
           title: 'Login failed',
           description: 'Invalid email or password',
+          className:'text-white'
         });
       }
     } catch (error) {
@@ -58,6 +61,7 @@ export default function Login() {
         variant: 'destructive',
         title: 'Login failed',
         description: 'An error occurred during login',
+        className:'text-white'
       });
     } finally {
       setIsLoading(false);

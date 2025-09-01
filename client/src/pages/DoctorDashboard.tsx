@@ -31,7 +31,6 @@ export default function DoctorDashboard() {
     }));
   };
 
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {

@@ -356,7 +356,7 @@ This analysis should be interpreted within the full clinical context and correla
           className="flex items-center gap-2 bg-accent text-white px-6 py-2.5 rounded-lg font-medium hover:bg-accent/90 transition"
         >
           <MessageSquare className="h-5 w-5" />
-          Chat with Dr. Thompson
+          Chat with Livsafe
         </button>
       </div>
     </div>
