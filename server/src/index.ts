@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -54,7 +54,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: 'Server is running!',
@@ -64,7 +64,7 @@ app.get('/health', (req, res) => {
 });
 
 // Health check endpoint for Railway
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
     message: 'Medical Assistant API is running',
@@ -81,7 +81,7 @@ app.use('/api/organization', organizationRoutes);
 app.use('/api/medical-images', medicalImageRoutes);
 
 // Root route
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
   res.json({
     message: 'Medical Assistant API',
     version: '1.0.0',

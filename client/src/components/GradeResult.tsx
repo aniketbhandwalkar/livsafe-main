@@ -8,6 +8,7 @@ interface PatientInfo {
   name: string;
   age: number;
   gender: string;
+  
   date: string;
 }
 

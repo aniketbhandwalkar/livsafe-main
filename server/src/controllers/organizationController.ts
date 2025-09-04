@@ -669,8 +669,9 @@ export const getOrganizationPatients = async (req: AuthRequest, res: Response) =
           .select('uploadedAt');
 
         // Determine assigned doctor (first doctor in the list)
-        const assignedDoctor = patient.doctors.length > 0 
-          ? patient.doctors[0].fullName 
+        const doctorsPopulated = patient.doctors as unknown as Array<{ fullName?: string }>;
+        const assignedDoctor = doctorsPopulated.length > 0 && doctorsPopulated[0]?.fullName
+          ? doctorsPopulated[0].fullName
           : 'Unassigned';
 
         return {
