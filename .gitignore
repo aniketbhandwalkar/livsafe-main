@@ -119,3 +119,5 @@ vite.config.ts.*
 # Temporary files
 *.tmp
 *.temp
+
+.vercel

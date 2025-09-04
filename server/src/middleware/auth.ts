@@ -27,7 +27,14 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
     try {
       // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string };
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        return res.status(500).json({
+          success: false,
+          message: 'JWT secret not configured'
+        });
+      }
+      const decoded = jwt.verify(token, jwtSecret) as { id: string };
 
       // First try to find a doctor with this ID
       const doctor = await Doctor.findById(decoded.id).select('-password').populate('organization', 'name');
@@ -69,7 +76,11 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
 // Generate JWT token
 export const generateToken = (id: string): string => {
-  return jwt.sign({ id }, process.env.JWT_SECRET!, {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    throw new Error('JWT secret not configured');
+  }
+  return jwt.sign({ id }, jwtSecret, {
     expiresIn: '30d',
   });
 };

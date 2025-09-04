@@ -1,0 +1,43 @@
+{
+  "name": "medical-assistant-backend",
+  "description": "Backend for Hospital Management System",
+  "repository": "https://github.com/yourusername/medical-assistant",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "keywords": ["node", "express", "mongodb", "medical", "hospital"],
+  "image": "heroku/nodejs",
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment",
+      "value": "production"
+    },
+    "JWT_SECRET": {
+      "description": "JWT Secret for authentication",
+      "generator": "secret"
+    },
+    "MONGO_URI": {
+      "description": "MongoDB connection string",
+      "value": "mongodb://localhost:27017/medical_assistant"
+    },
+    "CLIENT_URL": {
+      "description": "Frontend URL for CORS",
+      "value": "https://your-frontend.vercel.app"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "addons": [
+    {
+      "plan": "mongolab:sandbox"
+    }
+  ]
+}
