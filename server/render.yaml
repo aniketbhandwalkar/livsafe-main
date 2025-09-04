@@ -3,22 +3,15 @@ services:
     name: medical-assistant-backend
     env: node
     plan: free
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: JWT_SECRET
-        generateValue: true
+        value: livsafe_jwt_secret_2024_aniket_medical_assistant_secure_key_xyz789
       - key: MONGO_URI
-        fromDatabase:
-          name: medical-assistant-db
-          property: connectionString
+        value: mongodb+srv://aniketbhandwalkar83:Aniket09@48@livsafe.kny1vwe.mongodb.net/?retryWrites=true&w=majority&appName=livsafe
       - key: CLIENT_URL
-        value: https://your-frontend.vercel.app
+        value: https://livsafe-frontend.vercel.app
     healthCheckPath: /health
-
-databases:
-  - name: medical-assistant-db
-    plan: free
-    databaseName: medical_assistant
