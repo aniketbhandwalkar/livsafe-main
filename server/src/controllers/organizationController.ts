@@ -19,6 +19,13 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    // Get doctors in this organization with their patient counts
+    const doctors = await Doctor.find({ organization: organization._id })
+      .select('fullName specialty patients createdAt')
+      .populate('patients', 'fullName')
+      .sort({ createdAt: -1 })
+      .limit(10);
+
     // Get total doctors in this organization
     const totalDoctors = await Doctor.countDocuments({ organization: organization._id });
 
@@ -29,6 +36,7 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const totalRecordsToday = await MedicalImage.countDocuments({
+      doctor: { $in: doctors.map(d => d._id) },
       uploadedAt: { $gte: today, $lt: tomorrow }
     });
 
@@ -38,15 +46,49 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
     startOfMonth.setHours(0, 0, 0, 0);
 
     const totalRecordsMonth = await MedicalImage.countDocuments({
+      doctor: { $in: doctors.map(d => d._id) },
       uploadedAt: { $gte: startOfMonth }
     });
 
-    // Get doctors in this organization with their patient counts
-    const doctors = await Doctor.find({ organization: organization._id })
-      .select('fullName specialty patients createdAt')
-      .populate('patients', 'fullName')
-      .sort({ createdAt: -1 })
-      .limit(10);
+    // Get last month's records for comparison
+    const startOfLastMonth = new Date(startOfMonth);
+    startOfLastMonth.setMonth(startOfLastMonth.getMonth() - 1);
+    const endOfLastMonth = new Date(startOfMonth);
+    endOfLastMonth.setDate(0);
+
+    const lastMonthRecords = await MedicalImage.countDocuments({
+      doctor: { $in: doctors.map(d => d._id) },
+      uploadedAt: { $gte: startOfLastMonth, $lt: endOfLastMonth }
+    });
+
+    // Get yesterday's records for comparison
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const dayBeforeYesterday = new Date(yesterday);
+    dayBeforeYesterday.setDate(dayBeforeYesterday.getDate() - 1);
+
+    const yesterdayRecords = await MedicalImage.countDocuments({
+      doctor: { $in: doctors.map(d => d._id) },
+      uploadedAt: { $gte: yesterday, $lt: today }
+    });
+
+    const dayBeforeYesterdayRecords = await MedicalImage.countDocuments({
+      doctor: { $in: doctors.map(d => d._id) },
+      uploadedAt: { $gte: dayBeforeYesterday, $lt: yesterday }
+    });
+
+    // Calculate changes
+    const doctorsChange = lastMonthRecords > 0 
+      ? `+${Math.max(0, totalDoctors - lastMonthRecords)} from last month`
+      : '+0 from last month';
+
+    const recordsTodayChange = dayBeforeYesterdayRecords > 0
+      ? `+${Math.max(0, totalRecordsToday - dayBeforeYesterdayRecords)} from yesterday`
+      : '+0 from yesterday';
+
+    const recordsMonthChange = lastMonthRecords > 0
+      ? `+${Math.max(0, totalRecordsMonth - lastMonthRecords)} from last month`
+      : '+0 from last month';
 
     // Format doctors data with proper ID system
     const formattedDoctors = doctors.map((doctor, index) => {
@@ -74,11 +116,11 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
       data: {
         stats: {
           totalDoctors,
-          doctorsChange: '+1 from last month', // This would be calculated
+          doctorsChange,
           totalRecordsToday,
-          recordsTodayChange: '+2 from yesterday', // This would be calculated
+          recordsTodayChange,
           totalRecordsMonth,
-          recordsMonthChange: '+5 from last month' // This would be calculated
+          recordsMonthChange
         },
         doctors: formattedDoctors
       }

@@ -1,3 +1,4 @@
+
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { FileText, Mail, Printer, Save, MessageSquare } from 'lucide-react';
@@ -50,52 +51,79 @@ export function GradeResult({ patientInfo, fibrosis, analysis }: GradeResultProp
 
   const handleDownloadPDF = async () => {
     try {
-      // Create comprehensive PDF content
-      const pdfContent = `
-MEDICAL IMAGING REPORT
-======================
-
-Patient Information:
--------------------
-ID: ${patientInfo.id}
-Name: ${patientInfo.name}
-Age: ${patientInfo.age}
-Gender: ${patientInfo.gender}
-Date: ${patientInfo.date}
-
-Fibrosis Assessment:
-------------------
-Grade: ${fibrosis.grade}
-Confidence: ${fibrosis.confidence}%
-Severity: ${getFibrosisDescription(fibrosis.grade)}
-
-AI Analysis:
------------
-${analysis.join('\n')}
-
-Report Generated: ${new Date().toLocaleString()}
-System: TR-LivSafe Medical Assistant
-      `;
+      // Dynamic import for jsPDF
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
       
-      const blob = new Blob([pdfContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `medical-report-${patientInfo.id}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('MEDICAL IMAGING REPORT', 20, 30);
+      
+      // Add patient information
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PATIENT INFORMATION:', 20, 50);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`ID: ${patientInfo.id}`, 20, 65);
+      doc.text(`Name: ${patientInfo.name}`, 20, 75);
+      doc.text(`Age: ${patientInfo.age}`, 20, 85);
+      doc.text(`Gender: ${patientInfo.gender}`, 20, 95);
+      doc.text(`Date: ${patientInfo.date}`, 20, 105);
+      
+      // Add fibrosis assessment
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('FIBROSIS ASSESSMENT:', 20, 125);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Grade: ${fibrosis.grade}`, 20, 140);
+      doc.text(`Confidence: ${fibrosis.confidence}%`, 20, 150);
+      doc.text(`Severity: ${getFibrosisDescription(fibrosis.grade)}`, 20, 160);
+      
+      // Add AI analysis
+      if (analysis && analysis.length > 0) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('AI ANALYSIS:', 20, 180);
+        
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        let yPos = 195;
+        
+        analysis.forEach((item: string, index: number) => {
+          const splitText = doc.splitTextToSize(`${index + 1}. ${item}`, 170);
+          doc.text(splitText, 20, yPos);
+          yPos += splitText.length * 5 + 3;
+          
+          // Add new page if needed
+          if (yPos > 250) {
+            doc.addPage();
+            yPos = 20;
+          }
+        });
+      }
+      
+      // Add footer
+      doc.setFontSize(8);
+      doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 270);
+      doc.text('System: TR-LivSafe Medical Assistant', 20, 280);
+      
+      // Save the PDF
+      doc.save(`medical-report-${patientInfo.id}.pdf`);
       
       toast({
         title: 'PDF Downloaded',
-        description: `Medical report for ${patientInfo.name} has been downloaded`,
+        description: `Medical report for ${patientInfo.name} has been downloaded as PDF`,
       });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Download Failed',
-        description: 'Could not generate PDF report',
+        description: 'Could not generate PDF report. Please try again.',
       });
     }
   };

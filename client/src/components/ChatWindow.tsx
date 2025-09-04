@@ -35,21 +35,19 @@ export function ChatWindow({ initialAnalysis, patientData }: ChatWindowProps) {
   
   // Environment check performed silently
 
-  const DOCTOR_PROMPT = `You are Dr. Marcus Thompson, a distinguished hepatologist with over 30 years of clinical experience specializing in liver diseases and fibrosis assessment. You have:
+  const LIVSAFE_PROMPT = `You are LivSafe LLM, an advanced AI assistant specializing in liver health and fibrosis assessment. You have:
 
-- MD from Johns Hopkins University School of Medicine
-- Fellowship in Hepatology from Mayo Clinic
-- Board certifications in Internal Medicine and Gastroenterology
-- Published over 200 peer-reviewed papers on liver fibrosis
-- Former Chief of Hepatology at several leading medical centers
-- Extensive experience with liver biopsy interpretation and non-invasive fibrosis assessment
+- Comprehensive knowledge of liver diseases and fibrosis staging
+- Access to the latest medical research and clinical guidelines
+- Expertise in interpreting liver imaging and diagnostic results
+- Understanding of treatment protocols and follow-up recommendations
 
 Your communication style is:
-- Professional yet compassionate
+- Professional and informative
 - Evidence-based with clear explanations
-- Accessible to patients while maintaining medical accuracy
-- Focused on actionable clinical insights
-- Always emphasizing the importance of comprehensive clinical correlation
+- Accessible to users while maintaining medical accuracy
+- Focused on providing helpful clinical insights
+- Always emphasizing the importance of consulting healthcare professionals
 
 When discussing liver fibrosis stages:
 - F0: No fibrosis
@@ -60,7 +58,7 @@ When discussing liver fibrosis stages:
 
 Always provide practical recommendations and remind users that imaging findings should be correlated with clinical history, physical examination, and laboratory results for comprehensive patient care.
 
-Respond as Dr. Thompson would, with the authority of three decades of hepatology expertise.`;
+Respond as LivSafe LLM, providing helpful information while encouraging users to consult with their healthcare providers for medical decisions.`;
 
   // Initialize with analysis if provided
   useEffect(() => {
@@ -111,21 +109,21 @@ I've provided a detailed analysis above. Please feel free to ask any questions a
 
     const conversationHistory = messages
       .filter(msg => !msg.isAnalysis)
-      .map(msg => `${msg.type === 'user' ? 'Patient/Colleague' : 'Dr. Thompson'}: ${msg.content}`)
+      .map(msg => `${msg.type === 'user' ? 'User' : 'LivSafe LLM'}: ${msg.content}`)
       .join('\n\n');
 
     const contextPrompt = patientData 
       ? `Current patient context: ${patientData.name} (ID: ${patientData.id}), Grade: ${patientData.grade}, Confidence: ${patientData.confidence}%, Date: ${patientData.date}\n\n`
       : '';
 
-    const fullPrompt = `${DOCTOR_PROMPT}
+    const fullPrompt = `${LIVSAFE_PROMPT}
 
 ${contextPrompt}Previous conversation:
 ${conversationHistory}
 
 Current question: ${userMessage}
 
-Please respond as Dr. Thompson with your extensive clinical experience:`;
+Please respond as LivSafe LLM with helpful information:`;
 
     // API call initiated
     
@@ -221,32 +219,87 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
     });
   };
 
-  const downloadConversation = () => {
-    const conversation = messages
-      .map(msg => `[${msg.timestamp.toLocaleString()}] ${msg.type === 'user' ? 'You' : 'Dr. Thompson'}: ${msg.content}`)
-      .join('\n\n');
-
-    const patientInfo = patientData 
-      ? `Patient: ${patientData.name} (${patientData.id})\nGrade: ${patientData.grade}\nConfidence: ${patientData.confidence}%\nDate: ${patientData.date}\n\n---\n\n`
-      : '';
-
-    const content = `Medical Consultation with LIvsafe\n${'='.repeat(50)}\n\n${patientInfo}${conversation}`;
-    
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `consultation-${patientData?.id || 'general'}-${new Date().toISOString().split('T')[0]}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: 'Conversation Downloaded',
-      description: 'Your consultation has been saved',
-      className:'text-white'
-    });
+  const downloadConversation = async () => {
+    try {
+      // Dynamic import for jsPDF
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Medical Consultation with LivSafe', 20, 30);
+      
+      // Add patient information if available
+      if (patientData) {
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('PATIENT INFORMATION:', 20, 50);
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Patient: ${patientData.name} (${patientData.id})`, 20, 65);
+        doc.text(`Grade: ${patientData.grade}`, 20, 75);
+        doc.text(`Confidence: ${patientData.confidence}%`, 20, 85);
+        doc.text(`Date: ${patientData.date}`, 20, 95);
+        
+        // Add separator
+        doc.text('─'.repeat(50), 20, 110);
+      }
+      
+      // Add conversation
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('CONVERSATION:', 20, patientData ? 130 : 50);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      let yPos = patientData ? 145 : 65;
+      
+      messages.forEach((message, index) => {
+        const timestamp = message.timestamp.toLocaleString();
+        const sender = message.type === 'user' ? 'You' : 'LivSafe LLM';
+        const content = message.content;
+        
+        // Add message header
+        doc.setFont('helvetica', 'bold');
+        doc.text(`[${timestamp}] ${sender}:`, 20, yPos);
+        yPos += 5;
+        
+        // Add message content
+        doc.setFont('helvetica', 'normal');
+        const splitText = doc.splitTextToSize(content, 170);
+        doc.text(splitText, 20, yPos);
+        yPos += splitText.length * 5 + 10;
+        
+        // Add new page if needed
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+      });
+      
+      // Add footer
+      doc.setFontSize(8);
+      doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 270);
+      doc.text('System: LivSafe Medical Assistant', 20, 280);
+      
+      // Save the PDF
+      doc.save(`consultation-${patientData?.id || 'general'}-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: 'Conversation Downloaded',
+        description: 'Your consultation has been saved as PDF',
+        className:'text-white'
+      });
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Download Failed',
+        description: 'Could not generate PDF. Please try again.',
+        className:'text-white'
+      });
+    }
   };
 
   return (
@@ -300,7 +353,7 @@ Please respond as Dr. Thompson with your extensive clinical experience:`;
                   )}
                 </div>
                 <span className="text-xs text-primary-400">
-                  {message.type === 'user' ? 'You' : 'Dr. Thompson'} • {message.timestamp.toLocaleTimeString()}
+                  {message.type === 'user' ? 'You' : 'LivSafe LLM'} • {message.timestamp.toLocaleTimeString()}
                 </span>
               </div>
               <div className={`p-4 rounded-lg ${

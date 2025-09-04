@@ -45,7 +45,7 @@ export default function ChatPage() {
     // Set page title
     const title = patientId 
       ? `Medical Chat - ${urlParams.get('patientName') || 'Patient'} | LivSafe`
-      : 'Medical Chat with Dr. Thompson | LivSafe';
+      : 'Medical Chat with LivSafe LLM | LivSafe';
     document.title = title;
   }, []);
 

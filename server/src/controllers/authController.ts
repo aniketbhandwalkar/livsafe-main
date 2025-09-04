@@ -240,7 +240,8 @@ export const getCurrentUser = async (req: AuthRequest, res: Response) => {
           email: organization.email,
           fullName: organization.name, // Use name as fullName for organizations
           name: organization.name,
-          type: 'organization'
+          type: 'organization',
+          createdAt: organization.createdAt
         }
       });
     }

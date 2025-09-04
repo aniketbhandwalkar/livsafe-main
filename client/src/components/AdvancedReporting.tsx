@@ -66,11 +66,41 @@ export function AdvancedReporting() {
       // In a real app, this would call an API to generate the report
       console.log('Generating report with config:', reportConfig);
       
-      // Simulate download
-      const link = document.createElement('a');
-      link.href = '#';
-      link.download = `report-${reportConfig.type}-${new Date().toISOString().split('T')[0]}.${reportConfig.format}`;
-      link.click();
+      
+      let reportContent = '';
+      let fileName = '';
+      
+      switch (reportConfig.type) {
+        case 'doctors':
+          reportContent = generateDoctorReport();
+          fileName = 'doctor-performance-report';
+          break;
+        case 'patients':
+          reportContent = generatePatientReport();
+          fileName = 'patient-analytics-report';
+          break;
+        case 'records':
+          reportContent = generateRecordsReport();
+          fileName = 'medical-records-report';
+          break;
+        case 'analytics':
+          reportContent = generateAnalyticsReport();
+          fileName = 'analytics-dashboard-report';
+          break;
+        case 'comprehensive':
+          reportContent = generateComprehensiveReport();
+          fileName = 'comprehensive-organization-report';
+          break;
+      }
+      
+      // Download based on format
+      if (reportConfig.format === 'pdf') {
+        await downloadAsPDF(reportContent, fileName);
+      } else if (reportConfig.format === 'excel') {
+        downloadAsExcel(reportContent, fileName);
+      } else {
+        downloadAsCSV(reportContent, fileName);
+      }
     } catch (error) {
       console.error('Error generating report:', error);
     } finally {
@@ -80,8 +110,205 @@ export function AdvancedReporting() {
 
   const handlePreviewReport = () => {
     setPreviewMode(true);
-    // In a real app, this would show a preview modal
+    
     console.log('Previewing report with config:', reportConfig);
+    
+    // Show preview in alert for now (you can implement a proper modal)
+    let previewContent = '';
+    switch (reportConfig.type) {
+      case 'doctors':
+        previewContent = generateDoctorReport();
+        break;
+      case 'patients':
+        previewContent = generatePatientReport();
+        break;
+      case 'records':
+        previewContent = generateRecordsReport();
+        break;
+      case 'analytics':
+        previewContent = generateAnalyticsReport();
+        break;
+      case 'comprehensive':
+        previewContent = generateComprehensiveReport();
+        break;
+    }
+    
+    alert(`PREVIEW: ${reportConfig.type.toUpperCase()} REPORT\n\n${previewContent.substring(0, 500)}...`);
+    setPreviewMode(false);
+  };
+
+  // Report generation functions
+  const generateDoctorReport = () => {
+    return `DOCTOR PERFORMANCE REPORT
+Generated: ${new Date().toLocaleString()}
+Date Range: ${reportConfig.dateRange}
+
+Report includes:
+- Doctor performance metrics
+- Patient assignment statistics
+- Record completion rates
+- Specialty analysis
+
+Filters applied:
+- Doctors: ${reportConfig.filters.doctors.join(', ') || 'All'}
+- Specialties: ${reportConfig.filters.specialties.join(', ') || 'All'}
+- Status: ${reportConfig.filters.status.join(', ') || 'All'}`;
+  };
+
+  const generatePatientReport = () => {
+    return `PATIENT ANALYTICS REPORT
+Generated: ${new Date().toLocaleString()}
+Date Range: ${reportConfig.dateRange}
+
+Report includes:
+- Patient demographics
+- Visit frequency analysis
+- Health status distribution
+- Doctor assignment patterns
+
+Filters applied:
+- Doctors: ${reportConfig.filters.doctors.join(', ') || 'All'}
+- Specialties: ${reportConfig.filters.specialties.join(', ') || 'All'}
+- Status: ${reportConfig.filters.status.join(', ') || 'All'}`;
+  };
+
+  const generateRecordsReport = () => {
+    return `MEDICAL RECORDS REPORT
+Generated: ${new Date().toLocaleString()}
+Date Range: ${reportConfig.dateRange}
+
+Report includes:
+- Record volume statistics
+- Processing times
+- Quality metrics
+- Compliance data
+
+Filters applied:
+- Doctors: ${reportConfig.filters.doctors.join(', ') || 'All'}
+- Specialties: ${reportConfig.filters.specialties.join(', ') || 'All'}
+- Status: ${reportConfig.filters.status.join(', ') || 'All'}`;
+  };
+
+  const generateAnalyticsReport = () => {
+    return `ANALYTICS DASHBOARD REPORT
+Generated: ${new Date().toLocaleString()}
+Date Range: ${reportConfig.dateRange}
+
+Report includes:
+- Key performance indicators
+- Trend analysis
+- Comparative metrics
+- Predictive insights
+
+Filters applied:
+- Doctors: ${reportConfig.filters.doctors.join(', ') || 'All'}
+- Specialties: ${reportConfig.filters.specialties.join(', ') || 'All'}
+- Status: ${reportConfig.filters.status.join(', ') || 'All'}`;
+  };
+
+  const generateComprehensiveReport = () => {
+    return `COMPREHENSIVE ORGANIZATION REPORT
+Generated: ${new Date().toLocaleString()}
+Date Range: ${reportConfig.dateRange}
+
+Report includes:
+- Executive summary
+- Financial overview
+- Operational metrics
+- Strategic recommendations
+- Risk assessment
+- Future projections
+
+Filters applied:
+- Doctors: ${reportConfig.filters.doctors.join(', ') || 'All'}
+- Specialties: ${reportConfig.filters.specialties.join(', ') || 'All'}
+- Status: ${reportConfig.filters.status.join(', ') || 'All'}`;
+  };
+
+  // Download functions
+  const downloadAsPDF = async (content: string, fileName: string) => {
+    try {
+      // Dynamic import for jsPDF
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ORGANIZATION REPORT', 20, 30);
+      
+      // Add generation date
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 45);
+      
+      // Add content with proper pagination
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      let yPos = 60;
+      
+      const lines = doc.splitTextToSize(content, 170);
+      
+      lines.forEach((line: string) => {
+        // Check if we need a new page
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.text(line, 20, yPos);
+        yPos += 7;
+      });
+      
+      // Save the PDF
+      doc.save(`${fileName}-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: 'PDF Generated',
+        description: 'Report has been downloaded as PDF',
+        className: 'text-white',
+      });
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      // Fallback to text download with better error handling
+      toast({
+        variant: 'destructive',
+        title: 'PDF Generation Failed',
+        description: 'Falling back to text format',
+        className: 'text-white',
+      });
+      downloadAsText(content, fileName);
+    }
+  };
+
+  const downloadAsExcel = (content: string, fileName: string) => {
+    // For now, download as CSV (you can implement proper Excel generation)
+    downloadAsCSV(content, fileName);
+  };
+
+  const downloadAsCSV = (content: string, fileName: string) => {
+    const csvContent = content.split('\n').map(line => `"${line}"`).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName}-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAsText = (content: string, fileName: string) => {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const updateConfig = (key: keyof ReportConfig, value: any) => {

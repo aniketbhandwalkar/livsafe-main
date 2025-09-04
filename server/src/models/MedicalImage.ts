@@ -8,6 +8,8 @@ export interface IMedicalImage extends Document {
   uploadedAt: Date;
   grade?: string;
   confidence?: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const medicalImageSchema = new Schema<IMedicalImage>({
@@ -46,5 +48,8 @@ const medicalImageSchema = new Schema<IMedicalImage>({
     default: Date.now
   }
 });
+
+// Add timestamps to automatically track createdAt and updatedAt
+medicalImageSchema.set('timestamps', true);
 
 export default mongoose.model<IMedicalImage>('MedicalImage', medicalImageSchema);

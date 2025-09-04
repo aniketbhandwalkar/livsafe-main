@@ -1,4 +1,7 @@
 import React from 'react';
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const mission = "To empower individuals and communities to live safer, healthier lives through innovative technology and compassionate support.";
 const vision = "To be the leading platform for proactive safety and well-being, fostering a world where everyone feels secure and cared for.";
@@ -6,6 +9,16 @@ const team="We are a team of students from Yeshwantrao Chavhan College of Engine
 
 const About: React.FC = () => (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '2rem', color : 'white'}}>
+        {/* Back to Dashboard Button */}
+        <div style={{ marginBottom: '2rem' }}>
+            <Link href="/doctor/dashboard">
+                <Button className="bg-accent hover:bg-accent/90 text-white">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Go back to Dashboard
+                </Button>
+            </Link>
+        </div>
+        
         <h1>About Us</h1>
         <section style={{ marginBottom: '2rem' }}>
             <h1>Our Mission</h1>

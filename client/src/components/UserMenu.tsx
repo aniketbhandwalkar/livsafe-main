@@ -65,13 +65,9 @@ export function UserMenu({ initials, name }: UserMenuProps) {
       
       {isOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-primary-800 rounded-xl shadow-xl border border-primary-600 py-2 z-50">
-          {user?.type === 'organization' ? (
+          {user?.type === 'organization' && (
             <Link href="/organization/profile" className="block px-4 py-3 text-sm text-white hover:bg-primary-700 transition-colors duration-150 font-medium">
               Organization Profile
-            </Link>
-          ) : (
-            <Link href="/preferences" className="block px-4 py-3 text-sm text-white hover:bg-primary-700 transition-colors duration-150 font-medium">
-              Preferences
             </Link>
           )}
           <Link href="/update-password" className="block px-4 py-3 text-sm text-white hover:bg-primary-700 transition-colors duration-150 font-medium">

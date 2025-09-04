@@ -10,6 +10,7 @@ interface User {
   type: 'doctor' | 'organization';
   specialty?: string;
   organization?: any;
+  createdAt?: string;
 }
 
 interface AuthContextType {

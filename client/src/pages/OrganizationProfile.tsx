@@ -65,6 +65,7 @@ export default function OrganizationProfile() {
           variant: 'destructive',
           title: 'Failed to load profile',
           description: error.message || 'Could not load organization profile',
+          className:'text-white'
         });
       } finally {
         setIsLoading(false);
@@ -72,7 +73,7 @@ export default function OrganizationProfile() {
     };
 
     fetchProfile();
-  }, [form, toast]);
+  }, [toast]);
 
   const onSubmit = async (values: z.infer<typeof profileSchema>) => {
     try {
@@ -82,12 +83,16 @@ export default function OrganizationProfile() {
       toast({
         title: 'Profile updated successfully',
         description: 'Your organization profile has been updated.',
+        className:'text-white'
+
+
       });
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: 'Failed to update profile',
         description: error.message || 'Could not update organization profile',
+        className:'text-white'
       });
     } finally {
       setIsSaving(false);
@@ -145,6 +150,8 @@ export default function OrganizationProfile() {
                         <FormControl>
                           <Input
                             {...field}
+                            id="organization-name"
+                            name="organization-name"
                             placeholder="Enter organization name"
                             className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:outline-none bg-white border border-primary-600 text-black focus:ring-accent placeholder-gray-500"
                             disabled={isSaving}
@@ -182,7 +189,7 @@ export default function OrganizationProfile() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-primary-100">Organization Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSaving}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={isSaving}>
                         <FormControl>
                           <SelectTrigger className="w-full px-4 py-3 rounded-xl focus:ring-2 focus:outline-none bg-white border border-primary-600 text-black focus:ring-accent">
                             <SelectValue placeholder="Select organization type" />
@@ -207,8 +214,8 @@ export default function OrganizationProfile() {
                   </h4>
                   <div className="text-xs text-primary-300 space-y-1">
                     <p>• Organization ID: {user?.id || 'N/A'}</p>
-                    <p>• Account Type: Organization</p>
-                    <p>• Member Since: {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
+                    <p>• Account Type: {form.watch('type') ? form.watch('type').charAt(0).toUpperCase() + form.watch('type').slice(1) : 'Organization'}</p>
+                    <p>• Member Since: {user?.createdAt ? new Date(user.createdAt).getFullYear() : 'N/A'}</p>
                   </div>
                 </div>
 

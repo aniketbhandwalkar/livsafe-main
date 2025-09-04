@@ -29,17 +29,16 @@ export default function PatientRecordView() {
           let data;
           try {
 
-            data = await doctorAPI.getRecord(id);
+                                                   data = await doctorAPI.getRecord(id);
 
           } catch (doctorError) {
 
 
             try {
 
-              const imageData = await medicalImagesAPI.getImage(id);
+                                                           const imageData = await medicalImagesAPI.getImage(id);
 
-
-              if (imageData) {
+               if (imageData) {
                 data = {
                   id: imageData._id || imageData.id,
                   patientName:
@@ -56,8 +55,9 @@ export default function PatientRecordView() {
                   analysis:
                     imageData.analysis ||
                     (imageData.description ? [imageData.description] : []),
-                  createdAt: imageData.createdAt || imageData.uploadedAt,
-                  updatedAt: imageData.updatedAt || imageData.uploadedAt,
+                  createdAt: imageData.createdAt || imageData.uploadedAt || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                  updatedAt: imageData.updatedAt || imageData.uploadedAt || new Date(),
+                  uploadedAt: imageData.uploadedAt,
                 };
 
               } else {
@@ -70,9 +70,9 @@ export default function PatientRecordView() {
             }
           }
 
-          if (data) {
-            setRecord(data);
-          } else {
+                     if (data) {
+             setRecord(data);
+           } else {
 
             throw new Error("No record data received");
           }
@@ -104,8 +104,8 @@ export default function PatientRecordView() {
             "Recommended follow-up based on current findings.",
             "Clinical correlation with laboratory findings advised.",
           ],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+          updatedAt: new Date().toISOString(), // Current time
         };
         setRecord(mock);
       } finally {
@@ -412,15 +412,17 @@ This analysis should be interpreted within the full clinical context and correla
 
             <div className="mt-8 pt-6 border-t border-primary-600">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-primary-400">
-                <div className="flex items-center">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Created: {new Date(record.createdAt || Date.now()).toLocaleString()}
-                </div>
-                <div className="flex items-center">
-                  <Calendar className="mr-2 h-4 w-4" />
-                  Last Updated: {new Date(record.updatedAt || Date.now()).toLocaleString()}
-                </div>
+                                 <div className="flex items-center">
+                   <Calendar className="mr-2 h-4 w-4" />
+                   Created: {record.uploadedAt ? new Date(record.uploadedAt).toLocaleString() : 'Not available'}
+                 </div>
+                                   <div className="flex items-center">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Last Updated: {new Date().toLocaleString()}
+                  </div>
               </div>
+              
+              
             </div>
           </div>
         </div>
@@ -428,3 +430,4 @@ This analysis should be interpreted within the full clinical context and correla
     </div>
   );
 }
+

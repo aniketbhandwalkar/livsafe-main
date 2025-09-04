@@ -2,10 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Base theme - Dark purple with good contrast */
-* {
-  /* Remove the universal background color override */
-}
+
 
 :root {
   --background: #13072e;
@@ -29,7 +26,7 @@
   --ring: #2a1b4a;
   --radius: 0.5rem;
   
-  /* Chart Colors */
+ 
   --chart-1: 210 100% 70%;
   --chart-2: 160 100% 70%;
   --chart-3: 50 100% 70%;

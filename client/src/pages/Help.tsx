@@ -1,6 +1,19 @@
 import React from "react";
+import { Link } from 'wouter';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 const Help: React.FC = () => (
     <div style={{ maxWidth: 700, margin: "0 auto", padding: 24 , color: 'white' }}>
+        {/* Back to Dashboard Button */}
+        <div style={{ marginBottom: '2rem' }}>
+            <Link href="/doctor/dashboard">
+                <Button className="bg-accent hover:bg-accent/90 text-white">
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Go back to Dashboard
+                </Button>
+            </Link>
+        </div>
+        
         <h1>How to Use the Website</h1>
         <ol>
             <li>

@@ -24,6 +24,16 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
       doctor: doctorId,
       uploadedAt: { $gte: startOfMonth }
     });
+    
+    // Get year-to-date records
+    const startOfYear = new Date();
+    startOfYear.setMonth(0, 1);
+    startOfYear.setHours(0, 0, 0, 0);
+    
+    const yearToDateRecords = await MedicalImage.countDocuments({
+      doctor: doctorId,
+      uploadedAt: { $gte: startOfYear }
+    });
 
     // Get recent records
     const recentRecords = await MedicalImage.find({ doctor: doctorId })
@@ -67,19 +77,127 @@ export const getDashboard = async (req: AuthRequest, res: Response) => {
       color: gradeColors[item._id as keyof typeof gradeColors] || '#6b7280'
     }));
 
-    // Calculate accuracy (mock calculation - you can implement your own logic)
-    const accuracy = totalRecords > 0 ? Math.round(85 + Math.random() * 10) : 0;
+    // Calculate real analytics based on actual data
+    
+    // Get previous month data for comparison
+    const startOfPreviousMonth = new Date();
+    startOfPreviousMonth.setMonth(startOfPreviousMonth.getMonth() - 1);
+    startOfPreviousMonth.setDate(1);
+    startOfPreviousMonth.setHours(0, 0, 0, 0);
+    
+    const endOfPreviousMonth = new Date();
+    endOfPreviousMonth.setMonth(endOfPreviousMonth.getMonth());
+    endOfPreviousMonth.setDate(1);
+    endOfPreviousMonth.setHours(0, 0, 0, 0);
+    
+    const previousMonthRecords = await MedicalImage.countDocuments({
+      doctor: doctorId,
+      uploadedAt: { $gte: startOfPreviousMonth, $lt: endOfPreviousMonth }
+    });
+    
+    // Debug logging
+    console.log('Date ranges for analytics:');
+    console.log('Current month start:', startOfMonth);
+    console.log('Previous month start:', startOfPreviousMonth);
+    console.log('Previous month end:', endOfPreviousMonth);
+    console.log('Current month records:', monthlyRecords);
+    console.log('Previous month records:', previousMonthRecords);
+    
+    // Calculate total change (current month vs previous month)
+    const totalChange = monthlyRecords - previousMonthRecords;
+    let totalChangeText;
+    if (previousMonthRecords === 0 && monthlyRecords > 0) {
+      totalChangeText = `+${monthlyRecords} (first month with records)`;
+    } else {
+      totalChangeText = totalChange >= 0 
+        ? `+${totalChange} from last month` 
+        : `${totalChange} from last month`;
+    }
+    
+    // Calculate monthly change (current month vs previous month)
+    const monthlyChange = monthlyRecords - previousMonthRecords;
+    let monthlyChangeText;
+    if (previousMonthRecords === 0 && monthlyRecords > 0) {
+      monthlyChangeText = `+${monthlyRecords} (first month with records)`;
+    } else {
+      monthlyChangeText = monthlyChange >= 0 
+        ? `+${monthlyChange} from previous month` 
+        : `${monthlyChange} from last month`;
+    }
+    
+    // Calculate real accuracy based on records with grades
+    const recordsWithGrades = await MedicalImage.countDocuments({ 
+      doctor: doctorId, 
+      grade: { $exists: true, $ne: null } 
+    });
+    
+    const accuracy = totalRecords > 0 ? Math.round((recordsWithGrades / totalRecords) * 100) : 0;
+    
+    // Get accuracy from previous month for comparison
+    const previousMonthWithGrades = await MedicalImage.countDocuments({
+      doctor: doctorId,
+      grade: { $exists: true, $ne: null },
+      uploadedAt: { $gte: startOfPreviousMonth, $lt: endOfPreviousMonth }
+    });
+    
+    const previousMonthTotal = await MedicalImage.countDocuments({
+      doctor: doctorId,
+      uploadedAt: { $gte: startOfPreviousMonth, $lt: endOfPreviousMonth }
+    });
+    
+    const previousMonthAccuracy = previousMonthTotal > 0 
+      ? Math.round((previousMonthWithGrades / previousMonthTotal) * 100) 
+      : 0;
+    
+    const accuracyChange = accuracy - previousMonthAccuracy;
+    let accuracyChangeText;
+    if (previousMonthTotal === 0 && totalRecords > 0) {
+      accuracyChangeText = `+${accuracy}% (first month with records)`;
+    } else {
+      accuracyChangeText = accuracyChange >= 0 
+        ? `+${accuracyChange}% from last month` 
+        : `${accuracyChange}% from last month`;
+    }
+    
+    // Debug logging for accuracy
+    console.log('Accuracy calculations:');
+    console.log('Total records:', totalRecords);
+    console.log('Records with grades:', recordsWithGrades);
+    console.log('Current accuracy:', accuracy);
+    console.log('Previous month accuracy:', previousMonthAccuracy);
+    console.log('Accuracy change:', accuracyChange);
+    
+    // Calculate average confidence for records with confidence scores
+    const confidenceAggregation = await MedicalImage.aggregate([
+      { $match: { doctor: new mongoose.Types.ObjectId(doctorId), confidence: { $exists: true, $ne: null } } },
+      { $group: { _id: null, avgConfidence: { $avg: '$confidence' } } }
+    ]);
+    
+    const averageConfidence = confidenceAggregation.length > 0 
+      ? Math.round(confidenceAggregation[0].avgConfidence) 
+      : 0;
 
+    // Debug logging for final response
+    console.log('Final dashboard stats:');
+    console.log('Total Records:', totalRecords);
+    console.log('Total Change:', totalChangeText);
+    console.log('Monthly Records:', monthlyRecords);
+    console.log('Monthly Change:', monthlyChangeText);
+    console.log('Accuracy:', accuracy);
+    console.log('Accuracy Change:', accuracyChangeText);
+    
     res.status(200).json({
       success: true,
       data: {
         stats: {
           totalRecords,
-          totalChange: '+12 from last month', // This would be calculated based on previous month data
+          totalChange: totalChangeText,
           monthlyRecords,
-          monthlyChange: '+5 from previous month', // This would be calculated
+          monthlyChange: monthlyChangeText,
+          yearToDateRecords,
           accuracy,
-          accuracyChange: '+1.3% from last month' // This would be calculated
+          accuracyChange: accuracyChangeText,
+          averageConfidence
         },
         recentRecords: formattedRecords,
         gradeDistribution: formattedDistribution

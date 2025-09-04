@@ -54,8 +54,10 @@ export default function DoctorDashboard() {
             totalChange: '+0 from last month',
             monthlyRecords: 0,
             monthlyChange: '+0 from previous month',
+            yearToDateRecords: 0,
             accuracy: 0,
             accuracyChange: '+0% from last month',
+            averageConfidence: 0,
           },
           recentRecords: [],
           gradeDistribution: [],
@@ -122,44 +124,85 @@ export default function DoctorDashboard() {
 
   const handleDownloadPDF = async () => {
     try {
-      // Create PDF content with dashboard data
-      const pdfContent = `
-Doctor Dashboard Report
-======================
-
-Stats:
-- Total Records: ${dashboardData.stats.totalRecords}
-- Monthly Records: ${dashboardData.stats.monthlyRecords}
-- Accuracy: ${dashboardData.stats.accuracy}%
-
-Recent Records:
-${dashboardData.recentRecords.map((record: any, index: number) => 
-  `${index + 1}. ${record.patientName} - ${record.grade} (${record.date})`
-).join('\n')}
-
-Generated: ${new Date().toLocaleDateString()}
-      `;
+      // Dynamic import for jsPDF
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
       
-      const blob = new Blob([pdfContent], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `dashboard-report-${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DOCTOR DASHBOARD REPORT', 20, 30);
+      
+      // Add generation date
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, 45);
+      
+      // Add stats section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('DASHBOARD STATISTICS', 20, 65);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Records: ${dashboardData.stats.totalRecords}`, 20, 80);
+      doc.text(`Monthly Records: ${dashboardData.stats.monthlyRecords}`, 20, 90);
+      doc.text(`Year-to-Date Records: ${dashboardData.stats.yearToDateRecords}`, 20, 100);
+      doc.text(`Grading Accuracy: ${dashboardData.stats.accuracy}%`, 20, 110);
+      doc.text(`Average Confidence: ${dashboardData.stats.averageConfidence}%`, 20, 120);
+      
+      // Add recent records section
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('RECENT RECORDS', 20, 145);
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      let yPos = 160;
+      
+      dashboardData.recentRecords.forEach((record: any, index: number) => {
+        const recordText = `${index + 1}. ${record.patientName} - Grade: ${record.grade} - Date: ${record.date}`;
+        const splitText = doc.splitTextToSize(recordText, 170);
+        doc.text(splitText, 20, yPos);
+        yPos += splitText.length * 5 + 3;
+        
+        // Add new page if needed
+        if (yPos > 250) {
+          doc.addPage();
+          yPos = 20;
+        }
+      });
+      
+      // Add grade distribution if available
+      if (dashboardData.gradeDistribution && dashboardData.gradeDistribution.length > 0) {
+        doc.addPage();
+        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.text('GRADE DISTRIBUTION', 20, 30);
+        
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'normal');
+        let distYPos = 45;
+        
+        dashboardData.gradeDistribution.forEach((grade: any) => {
+          doc.text(`${grade.name}: ${grade.value} records`, 20, distYPos);
+          distYPos += 15;
+        });
+      }
+      
+      // Save the PDF
+      doc.save(`dashboard-report-${new Date().toISOString().split('T')[0]}.pdf`);
       
       toast({
         title: 'PDF Downloaded',
-        description: 'Dashboard report has been downloaded',
+        description: 'Dashboard report has been downloaded as PDF',
         className: 'text-white',
       });
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Download Failed',
-        description: 'Could not generate PDF report',
+        description: 'Could not generate PDF report. Please try again.',
         className: 'text-white',
       });
     }
@@ -328,7 +371,7 @@ Generated: ${new Date().toLocaleDateString()}
           </div>
           
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
               title="Total Records"
               value={dashboardData.stats.totalRecords}
@@ -352,6 +395,14 @@ Generated: ${new Date().toLocaleDateString()}
               icon={<CheckCircle2 className="h-5 w-5" />}
               iconColor="text-green-500"
               iconBgColor="bg-green-500 bg-opacity-20"
+            />
+            <StatCard
+              title="Avg Confidence"
+              value={`${dashboardData.stats.averageConfidence}%`}
+              change="Based on graded records"
+              icon={<CheckCircle2 className="h-5 w-5" />}
+              iconColor="text-blue-500"
+              iconBgColor="bg-blue-500 bg-opacity-20"
             />
           </div>
           

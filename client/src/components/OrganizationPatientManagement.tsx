@@ -98,11 +98,9 @@ export function OrganizationPatientManagement() {
     // Create CSV content
     const csvContent = [
       // Header
-      ['Patient Report', 'Generated on ' + new Date().toLocaleDateString()],
-      [],
-      // Patient data
       ['Patient ID', 'Name', 'Age', 'Gender', 'Assigned Doctor', 'Records', 'Last Visit', 'Status'],
-      ...patients.map(patient => [
+      // Data rows
+      ...filteredPatients.map(patient => [
         patient.id,
         patient.fullName,
         patient.age,
@@ -114,16 +112,65 @@ export function OrganizationPatientManagement() {
       ])
     ].map(row => row.join(',')).join('\n');
 
-    // Create and download file
+    // Download CSV
     const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `patient-report-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `patients-${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleViewPatient = (patient: Patient) => {
+    // In a real app, this would open a modal or navigate to patient details
+    console.log('Viewing patient:', patient);
+    // You can implement a modal here or navigate to a patient detail page
+    alert(`Viewing patient: ${patient.fullName}\nAge: ${patient.age}\nGender: ${patient.gender}\nAssigned Doctor: ${patient.assignedDoctor}\nRecords: ${patient.recordCount}\nLast Visit: ${new Date(patient.lastVisit).toLocaleDateString()}\nStatus: ${patient.status}`);
+  };
+
+  const handleDownloadPatientReport = async (patient: Patient) => {
+    try {
+      // Dynamic import for jsPDF
+      const jsPDF = (await import('jspdf')).default;
+      const doc = new jsPDF();
+      
+      // Add title
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PATIENT REPORT', 20, 30);
+      
+      // Add patient information
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('PATIENT INFORMATION:', 20, 50);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`ID: ${patient.id}`, 20, 65);
+      doc.text(`Name: ${patient.fullName}`, 20, 75);
+      doc.text(`Age: ${patient.age}`, 20, 85);
+      doc.text(`Gender: ${patient.gender}`, 20, 95);
+      doc.text(`Assigned Doctor: ${patient.assignedDoctor}`, 20, 105);
+      doc.text(`Total Records: ${patient.recordCount}`, 20, 115);
+      doc.text(`Last Visit: ${new Date(patient.lastVisit).toLocaleDateString()}`, 20, 125);
+      doc.text(`Status: ${patient.status}`, 20, 135);
+      doc.text(`Created: ${new Date(patient.createdAt).toLocaleDateString()}`, 20, 145);
+      
+      // Add footer
+      doc.setFontSize(8);
+      doc.text(`Report Generated: ${new Date().toLocaleString()}`, 20, 270);
+      doc.text('Organization: Medical Assistant System', 20, 280);
+      
+      // Save the PDF
+      doc.save(`patient-report-${patient.id}-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      console.log('Patient report downloaded as PDF:', patient.fullName);
+    } catch (error) {
+      console.error('Error downloading patient report:', error);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -324,13 +371,26 @@ export function OrganizationPatientManagement() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary-200 hover:text-white"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-200 hover:text-white hover:bg-primary-700"
+                          onClick={() => handleViewPatient(patient)}
+                          title="View Patient Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-200 hover:text-white hover:bg-primary-700"
+                          onClick={() => handleDownloadPatientReport(patient)}
+                          title="Download Patient Report"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
