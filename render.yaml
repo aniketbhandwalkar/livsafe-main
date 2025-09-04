@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     rootDir: server
-    buildCommand: npm run build:prod
+    buildCommand: npm run build:render
     startCommand: npm start
     envVars:
       - key: NODE_ENV

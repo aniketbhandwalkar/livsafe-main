@@ -9,6 +9,7 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsc --build",
     "build:prod": "npm install --include=dev && npm run build",
+    "build:render": "npm ci --include=dev && npm run build",
     "test": "jest",
     "seed": "tsx src/utils/seeder.ts",
     "destroy": "tsx src/utils/seeder.ts -d",
