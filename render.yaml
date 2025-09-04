@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: livsafe-backend
+    env: node
+    plan: free
+    rootDir: server
+    buildCommand: npm run build:prod
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        value: livsafe_jwt_secret_2024_aniket_medical_assistant_secure_key_xyz789
+      - key: MONGO_URI
+        value: mongodb+srv://aniketbhandwalkar83:Aniket09@48@livsafe.kny1vwe.mongodb.net/?retryWrites=true&w=majority&appName=livsafe
+      - key: CLIENT_URL
+        value: https://livsafe-frontend.vercel.app
+    healthCheckPath: /health
